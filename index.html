@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityPulse - Smart City Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: white;
+            padding: 20px 0;
+        }
+
+        .logo span {
+            color: #fbbf24;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 0;
+        }
+
+        .nav-menu li a {
+            display: block;
+            padding: 25px 30px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-menu li a:hover,
+        .nav-menu li a.active {
+            background: rgba(255,255,255,0.1);
+            border-bottom-color: #fbbf24;
+        }
+
+        /* Page Container */
+        .page {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Page 1: Dashboard */
+        .dashboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .dashboard-header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: -40px auto 60px;
+            padding: 0 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            border-left: 5px solid #667eea;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .stat-label {
+            font-size: 0.95em;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .stat-unit {
+            font-size: 0.9em;
+            color: #a0aec0;
+        }
+
+        .stat-status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .status-good {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-moderate {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-poor {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            transition: width 1s ease;
+        }
+
+        .clock-container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .current-time {
+            font-size: 3.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .current-date {
+            font-size: 1.3em;
+            color: #718096;
+        }
+
+        /* Page 2: Alerts */
+        .alerts-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .alerts-header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .alerts-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 12px 25px;
+            background: #e2e8f0;
+            border: 2px solid transparent;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: #4a5568;
+        }
+
+        .filter-btn:hover {
+            background: #cbd5e0;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .alerts-list {
+            display: grid;
+            gap: 20px;
+        }
+
+        .alert-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            transition: all 0.3s;
+            animation: slideIn 0.5s;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .alert-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .alert-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            flex-shrink: 0;
+        }
+
+        .alert-traffic { background: #fef3c7; }
+        .alert-health { background: #dbeafe; }
+        .alert-weather { background: #e0e7ff; }
+        .alert-notice { background: #f3e8ff; }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-category {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .category-traffic {
+            background: #fbbf24;
+            color: #78350f;
+        }
+
+        .category-health {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .category-weather {
+            background: #6366f1;
+            color: white;
+        }
+
+        .category-notice {
+            background: #8b5cf6;
+            color: white;
+        }
+
+        .alert-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #2d3748;
+        }
+
+        .alert-description {
+            color: #4a5568;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .alert-time {
+            font-size: 0.9em;
+            color: #a0aec0;
+        }
+
+        /* Page 3: City Map */
+        .map-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .map-header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .map-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .map-wrapper {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .city-map {
+            position: relative;
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding-bottom: 75%;
+            background: linear-gradient(135deg, #e0e7ff 0%, #dbeafe 100%);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .map-zone {
+            position: absolute;
+            background: rgba(102, 126, 234, 0.3);
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+        }
+
+        .map-zone:hover {
+            background: rgba(102, 126, 234, 0.6);
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            z-index: 10;
+        }
+
+        .zone-label {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.4em;
+            font-weight: bold;
+            color: #667eea;
+            white-space: nowrap;
+        }
+
+        /* Zone positions */
+        .zone-park { top: 10%; left: 10%; width: 25%; height: 30%; }
+        .zone-hospital { top: 10%; left: 40%; width: 25%; height: 30%; }
+        .zone-school { top: 10%; left: 70%; width: 25%; height: 30%; }
+        .zone-mall { top: 45%; left: 10%; width: 25%; height: 30%; }
+        .zone-library { top: 45%; left: 40%; width: 25%; height: 30%; }
+        .zone-stadium { top: 45%; left: 70%; width: 25%; height: 30%; }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.4s;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .modal-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+        }
+
+        .modal-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2d3748;
+        }
+
+        .modal-info {
+            margin-bottom: 20px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .info-value {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Page 4: Feedback */
+        .feedback-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .feedback-header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .feedback-container {
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .feedback-form {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 1.1em;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .error-message {
+            color: #e53e3e;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .social-section {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .social-section h3 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .social-link {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5em;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .social-link:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Success Modal */
+        .success-modal .modal-icon {
+            background: #10b981;
+        }
+
+        .success-modal .modal-title {
+            color: #10b981;
+        }
+
+        .success-modal .modal-close {
+            background: #10b981;
+        }
+
+        .success-modal .modal-close:hover {
+            box-shadow: 0 5px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+
+            .dashboard-header h1,
+            .alerts-header h1,
+            .map-header h1,
+            .feedback-header h1 {
+                font-size: 2em;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .current-time {
+                font-size: 2.5em;
+            }
+
+            .filter-section {
+                justify-content: center;
+            }
+
+            .zone-label {
+                font-size: 0.3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">City<span>Pulse</span></div>
+            <ul class="nav-menu">
+                <li><a href="#" class="active" onclick="showPage('dashboard')">Dashboard</a></li>
+                <li><a href="#" onclick="showPage('alerts')">Alerts</a></li>
+                <li><a href="#" onclick="showPage('map')">City Map</a></li>
+                <li><a href="#" onclick="showPage('feedback')">Feedback</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page 1: Dashboard -->
+    <div id="dashboard" class="page active">
+        <div class="dashboard-header">
+            <h1>Smart City Dashboard</h1>
+            <p>Real-time civic data and insights at your fingertips</p>
+        </div>
+
+        <div class="dashboard-container">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🌡️</div>
+                    <div class="stat-label">Temperature</div>
+                    <div class="stat-value">24°<span class="stat-unit">C</span></div>
+                    <div class="stat-status status-good">Pleasant</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 60%;"></div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">💨</div>
+                    <div class="stat-label">Air Quality Index</div>
+                    <div class="stat-value">45<span class="stat-unit"> AQI</span></div>
+                    <div class="stat-status status-good">Good</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 45%;"></div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">🚗</div>
+                    <div class="stat-label">Traffic Density</div>
+                    <div class="stat-value">68<span class="stat-unit">%</span></div>
+                    <div class="stat-status status-moderate">Moderate</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 68%;"></div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">⚡</div>
+                    <div class="stat-label">Power Consumption</div>
+                    <div class="stat-value">82<span class="stat-unit">%</span></div>
+                    <div class="stat-status status-poor">High</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 82%;"></div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">💧</div>
+                    <div class="stat-label">Water Supply</div>
+                    <div class="stat-value">92<span class="stat-unit">%</span></div>
+                    <div class="stat-status status-good">Optimal</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 92%;"></div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">🚨</div>
+                    <div class="stat-label">Active Alerts</div>
+                    <div class="stat-value">3<span class="stat-unit"> alerts</span></div>
+                    <div class="stat-status status-moderate">Attention</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 30%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="clock-container">
+                <div class="current-time" id="currentTime">00:00:00</div>
+                <div class="current-date" id="currentDate">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page 2: Alerts & News -->
+    <div id="alerts" class="page">
+        <div class="alerts-header">
+            <h1>City Alerts & News</h1>
+            <p>Stay informed about important civic updates</p>
+        </div>
+
+        <div class="alerts-container">
+            <div class="filter-section">
+                <button class="filter-btn active" onclick="filterAlerts('all')">All</button>
+                <button class="filter-btn" onclick="filterAlerts('Traffic')">Traffic</button>
+                <button class="filter-btn" onclick="filterAlerts('Health')">Health</button>
+                <button class="filter-btn" onclick="filterAlerts('Weather')">Weather</button>
+                <button class="filter-btn" onclick="filterAlerts('Public Notice')">Public Notices</button>
+            </div>
+
+            <div class="alerts-list" id="alertsList"></div>
+        </div>
+    </div>
+
+    <!-- Page 3: Interactive Map -->
+    <div id="map" class="page">
+        <div class="map-header">
+            <h1>Interactive City Map</h1>
+            <p>Explore city facilities and zones</p>
+        </div>
+
+        <div class="map-container">
+            <div class="map-wrapper">
+                <div class="city-map">
+                    <div class="map-zone zone-park" onclick="showZoneInfo('park')">
+                        🌳
+                        <div class="zone-label">City Park</div>
+                    </div>
+                    <div class="map-zone zone-hospital" onclick="showZoneInfo('hospital')">
+                        🏥
+                        <div class="zone-label">Hospital</div>
+                    </div>
+                    <div class="map-zone zone-school" onclick="showZoneInfo('school')">
+                        🏫
+                        <div class="zone-label">School</div>
+                    </div>
+                    <div class="map-zone zone-mall" onclick="showZoneInfo('mall')">
+                        🏬
+                        <div class="zone-label">Shopping Mall</div>
+                    </div>
+                    <div class="map-zone zone-library" onclick="showZoneInfo('library')">
+                        📚
+                        <div class="zone-label">Library</div>
+                    </div>
+                    <div class="map-zone zone-stadium" onclick="showZoneInfo('stadium')">
+                        🏟️
+                        <div class="zone-label">Stadium</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page 4: Feedback -->
+    <div id="feedback" class="page">
+        <div class="feedback-header">
+            <h1>Citizen Connect</h1>
+            <p>Share your feedback and help improve our city</p>
+        </div>
+
+        <div class="feedback-container">
+            <form class="feedback-form" id="feedbackForm">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" placeholder="Enter your name" required>
+                    <div class="error-message" id="nameError">Please enter your name</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" placeholder="your.email@example.com" required>
+                    <div class="error-message" id="emailError">Please enter a valid email address</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Your Message</label>
+                    <textarea id="message" placeholder="Share your thoughts, suggestions, or report issues..." required></textarea>
+                    <div class="error-message" id="messageError">Please enter your message</div>
+                </div>
+
+                <button type="submit" class="submit-btn">Submit Feedback</button>
+            </form>
+
+            <div class="social-section">
+                <h3>Connect With Us</h3>
+                <div class="social-links">
+                    <a href="#" class="social-link">f</a>
+                    <a href="#" class="social-link">t</a>
+                    <a href="#" class="social-link">📷</a>
+                    <a href="#" class="social-link">in</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Zone Info Modal -->
+    <div id="zoneModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon" id="zoneIcon">🏢</div>
+                <div class="modal-title" id="zoneTitle">Zone Info</div>
+            </div>
+            <div class="modal-info" id="zoneInfo"></div>
+            <button class="modal-close" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal success-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon">✓</div>
+                <div class="modal-title">Feedback
